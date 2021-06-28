@@ -40,7 +40,6 @@ $COMMIT_MESSAGE=(git log -1 "$env:APPVEYOR_REPO_COMMIT" --pretty="%b") -replace 
 
 # Remove Starting and Ending double quotes by ConvertTo-Json
 $COMMIT_MESSAGE = $COMMIT_MESSAGE.Substring(1, $COMMIT_MESSAGE.Length-2)
-$CREDITS = $CREDITS.Substring(1, $CREDITS.Length-2)
 
 if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
   $COMMIT_SUBJECT="PR #$env:APPVEYOR_PULL_REQUEST_NUMBER - $env:APPVEYOR_PULL_REQUEST_TITLE"
