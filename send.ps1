@@ -11,8 +11,6 @@ if (!$WEBHOOK_URL) {
   Exit
 }
 
-Write-Output "[Webhook]: Sending webhook to Discord..."
-
 Switch ($STATUS) {
   "success" {
     $EMBED_COLOR=3066993
@@ -40,15 +38,6 @@ $COMMITTER_NAME="$(git log -1 "$env:APPVEYOR_REPO_COMMIT" --pretty="%cN")"
 $COMMIT_SUBJECT="$(git log -1 "$env:APPVEYOR_REPO_COMMIT" --pretty="%s")" -replace "`"", "'"
 $COMMIT_MESSAGE=(git log -1 "$env:APPVEYOR_REPO_COMMIT" --pretty="%b") -replace "`"", "'" | Out-String | ConvertTo-Json
 
-if ($AUTHOR_NAME -eq $COMMITTER_NAME) {
-  $CREDITS="`n$AUTHOR_NAME authored & committed" | ConvertTo-Json
-
-}
-else {
-  $CREDITS="`n$AUTHOR_NAME authored & $COMMITTER_NAME committed" | ConvertTo-Json
-
-}
-
 # Remove Starting and Ending double quotes by ConvertTo-Json
 $COMMIT_MESSAGE = $COMMIT_MESSAGE.Substring(1, $COMMIT_MESSAGE.Length-2)
 $CREDITS = $CREDITS.Substring(1, $CREDITS.Length-2)
@@ -69,13 +58,13 @@ $WEBHOOK_DATA="{
   ""embeds"": [ {
     ""color"": $EMBED_COLOR,
     ""author"": {
-      ""name"": ""Job #$env:APPVEYOR_JOB_NUMBER (Build #$env:APPVEYOR_BUILD_NUMBER) $STATUS_MESSAGE - $env:APPVEYOR_REPO_NAME"",
+      ""name"": ""Build #$env:APPVEYOR_BUILD_NUMBER $STATUS_MESSAGE - $env:APPVEYOR_REPO_NAME"",
       ""url"": ""https://ci.appveyor.com/project/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/build/$BUILD_VERSION"",
       ""icon_url"": ""$AVATAR""
     },
     ""title"": ""$COMMIT_SUBJECT"",
     ""url"": ""$URL"",
-    ""description"": ""$COMMIT_MESSAGE $CREDITS"",
+    ""description"": ""$COMMIT_MESSAGE"",
     ""fields"": [
       {
         ""name"": ""Commit"",
@@ -93,7 +82,7 @@ $WEBHOOK_DATA="{
 }"
 
 Invoke-RestMethod -Uri "$WEBHOOK_URL" -Method "POST" -UserAgent "AppVeyor-Webhook" `
-  -ContentType "application/json" -Header @{"X-Author"="k3rn31p4nic#8383"} `
+  -ContentType "application/json" `
   -Body $WEBHOOK_DATA
 
-Write-Output "[Webhook]: Successfully sent the webhook."
+Write-Output "[Discord]: Sent build status to webhook."
